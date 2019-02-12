@@ -13,7 +13,7 @@ if(isset($_GET['page'])){
 	Header("Location:index.php");	
 }
 }
-if(isset($_POST['like']) || isset($_POST['deslike'])){
+if(isset($_POST['like']) || isset($_POST['deslike']) || isset($_POST['comment'])){
 	if(isset($_GET['page'])){
 	$page = "&page=" . $_GET['page'];		
 }else{
