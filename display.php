@@ -71,7 +71,7 @@ eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 <?php
 $name = $_GET['v'];
 $out_name = substr($name,0,7);
-$searchq = preg_replace("#[^0-9a-z,]#i"," ",$out_name);
+$searchq = preg_replace("#[^0-9a-z,.-]#i"," ",$out_name);
 $sql10 = "SELECT id, title, content, date, tag, video_name, views_counter, uploader, likes, deslikes, audio, downloads, image FROM videos WHERE video_name LIKE '%$searchq%'";
 $res = mysqli_query($db, $sql10) or die(msqli_error());
 
