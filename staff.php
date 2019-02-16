@@ -2,7 +2,7 @@
 include_once("db.php");
 $name = $_GET['uploader'];
 $out_name = substr($name,0,7);
-$searchq = preg_replace("#[^0-9a-z,]#i"," ",$out_name);
+$searchq = preg_replace("#[^0-9a-z,.-]#i"," ",$out_name);
 $sql10 = "SELECT * FROM users WHERE token LIKE '%$searchq%'";
 $result = $connsource->query($sql10);
 $row = $result->fetch_assoc();
@@ -49,78 +49,31 @@ eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 <div class="row" style="min-height:637px;">
 <div class="col my-sidebar">
 <!--NAV-->
-
-
-
-
 <div style="color: black" class="collapse ml-1" id="collapseExample">
   <div style="display:inline">
 <?php
 $sqlsource = "SELECT tag, title FROM videos ORDER BY id DESC LIMIT 30";
 $resultsource = $connsource->query($sqlsource);
 $rowsource = $resultsource->fetch_assoc();
- 
 while($rowsource = $resultsource->fetch_assoc()) {
 $source = $rowsource['tag'];
 $title = $rowsource['title'];
 $pieces = explode(",", $source);
-
 ?>
-
 <?php
 while(list(, $val) = each($pieces)){
 	$pieces++;
-	?>
-	
-	
+	?>	
 	<a style="color: black" class="" href="search.php?search=<?php echo $val?>&page=1"><i class="fa fa-hashtag"></i> <?php echo $val?></a>
-	
-	
-
 <?php	
 }
 } 
 ?>
-  </div>
+</div>
 </div>
 <!--NAV-->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!--MAIN-->
-
-<?php	
-	
+<?php		
 	$sql = "SELECT * FROM videos WHERE uploader='$upcheck' ORDER BY id DESC";
 	$result = $connsource->query($sql);                                                                                                                                                         
 	$rowcount=mysqli_num_rows($result);
@@ -139,37 +92,34 @@ while(list(, $val) = each($pieces)){
 	$status = $rowsource['status'];
 	$out_country = substr($country, 0, 2);
 	$out_country = strtolower($out_country);
+	$flag = "<span class='flag-icon flag-icon-$out_country'></span>";
 	if ($rowsource['thumb'] == false){
 	$thumb = "unknown.png";
 	}
-	
-	if($rowsource['status'] == "Banned"){
-		echo "<h1>Status: $status</h1>";
-	}else{
-	
 	if ($rowsource['age'] == false){
 	$birthDate = "00/00/0000";
 	}
-	
 	$birthDate = explode("/", $birthDate);
 	$age = (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
     ? ((date("Y") - $birthDate[2]) - 1)
     : (date("Y") - $birthDate[2]));
-	
-	if($rowsource['privacy'] == "Closed"){
-	echo "<div class='text-center p-1 bg-secondary'><img style='width:200px;height:200px' class='img-thumbnail' src='unknown.png'></img></div><h5 style='min-height:340px'>Name: $staff <br>Posts: $rowcount <br>Privacy: $privacy <br>Status: $status</h5>";	
-	}else{
-
-
-echo "<div class='text-center p-1 bg-secondary'><img style='width:200px;height:200px' class='img-thumbnail' src='$thumb'></img></div>";
-echo "<div class='p-1'><h5>Name: $staff  <br>Posts: $rowcount <br>Age: $age <br>Country: <span class='flag-icon flag-icon-$out_country'></span><br>Privacy: $privacy <br>User Rank: $rank <br>Join Date: $joindate <br>Status: $status<br>
-About Me: $about</h5></div>";
+	function show_user(array $info, $img){	
+	echo $img;		
+	foreach($info as $key => $value){
+		echo "<div class='ml-1'><b class='text-secondary'>" . ucwords($key) . "</b>:<span class='text-info ml-1'><b>" . ucfirst($value) . "</b></span></div>";
+	}	
 	}
-
+	if($rowsource['privacy'] != "Closed" || $rowsource['status'] != "Banned"){
+	$img = "<div class='text-center p-1 bg-secondary'><img style='width:200px;height:200px' class='img-thumbnail' src='$thumb'></img></div>";
+	$my_info = array('name' => $staff, 'rank' => $rank, 'age' => $age, 'joindate' => $joindate, 'status' => $status, 'country' => strtolower($flag), 'privacy' => $privacy, 'about' => $about);
+	}else{
+	$thumb = "unknown.png";	
+	$my_info = array('name' => $staff, 'privacy' => $privacy);	
+	}
+	show_user($my_info, $img);
 ?>
 <div class="p-1 bg-secondary text-white">
 <h1>All My Content</h1>
-
 <?php
 if ($result->num_rows>0) {
     // output data of each row
@@ -186,15 +136,8 @@ if ($result->num_rows>0) {
 			$out_title = substr($video_name, 0, -25) . "_" . $title;
 			
 ?>
-
-
-
 <!--CONTENT-->
-
-
-
-<div class="content2" style="display:none;">
-
+<div class="content2" style="display:none;min-height:150px">
 <a class="text-light" href="display.php?v=<?php echo $out_title?>"><?php echo $title?></a>
 </div>
 <?php 
@@ -204,7 +147,6 @@ echo "<h1 class='p-3'>0 results</h1>";
 }	
 ?>
 </div>
-
 <style>
 .btload {
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
@@ -253,7 +195,6 @@ echo "<h1 class='p-3'>0 results</h1>";
 }
 </style>
 <?php
-
 if($result->num_rows > 5){
 echo "<div class='btload mb-1 d-flex justify-content-center'>
 <a href='#' class='btn btn-outline-secondary btn-sm ml-1 mr-1 btn-block mt-1' id='loadMore'>Load More</a>
@@ -295,19 +236,9 @@ $(window).scroll(function () {
     }
 });
 </script>
-
-<?php 
-}
-?>
 </div> 
-
 </div>
-
 </div>
-
-
-
-
 <style>
 html{
     overflow-y: scroll;
@@ -335,7 +266,3 @@ margin:0 auto;
 </div>
 </body>
 </html>
-
-
-
-
